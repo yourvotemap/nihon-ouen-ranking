@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Entity {
+  id                 String    @id @default(cuid())
+  countryCode        String    @default("JP")
+  category           String
+  name               String
+  slug               String
+  description        String
+  shortDescription   String
+  imageUrl           String?
+  officialUrl        String?
+  tags               String    @default("[]")
+  totalSupportPoints Int       @default(0)
+  supportCount       Int       @default(0)
+  status             String    @default("active")
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  supports           Support[]
+
+  @@unique([countryCode, slug])
+}
+
+model Support {
+  id                 String            @id @default(cuid())
+  countryCode        String            @default("JP")
+  entityId           String
+  entity             Entity            @relation(fields: [entityId], references: [id])
+  userId             String?
+  supporterName      String?
+  email              String?
+  paymentType        String            @default("free")
+  supporterAccountId String?
+  supporterAccount   SupporterAccount? @relation(fields: [supporterAccountId], references: [id])
+  points             Int
+  comment            String
+  status             String            @default("visible")
+  ipHash             String?
+  createdAt          DateTime          @default(now())
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  countryCode String   @default("JP")
+  targetType  String
+  targetId    String
+  reason      String
+  detail      String?
+  status      String   @default("open")
+  createdAt   DateTime @default(now())
+}
+
+model RateLimitRecord {
+  id        String   @id @default(cuid())
+  ipHash    String
+  entityId  String
+  createdAt DateTime @default(now())
+
+  @@index([ipHash, entityId])
+}
+
+model FreeSupportRecord {
+  id        String   @id @default(cuid())
+  ipHash    String
+  entityId  String
+  createdAt DateTime @default(now())
+
+  @@index([ipHash, entityId])
+}
+
+model SupporterAccount {
+  id                   String             @id @default(cuid())
+  email                String             @unique
+  displayName          String?
+  pointBalance         Int                @default(0)
+  totalPurchasedPoints Int                @default(0)
+  totalSpentPoints     Int                @default(0)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  supports             Support[]
+  purchases            PointPurchase[]
+  transactions         PointTransaction[]
+}
+
+model PointPurchase {
+  id                 String             @id @default(cuid())
+  supporterAccountId String?
+  stripeSessionId    String             @unique
+  email              String
+  points             Int
+  amount             Int
+  currency           String             @default("jpy")
+  status             String             @default("pending")
+  createdAt          DateTime           @default(now())
+  paidAt             DateTime?
+  supporterAccount   SupporterAccount?  @relation(fields: [supporterAccountId], references: [id])
+  transactions       PointTransaction[]
+}
+
+model PointTransaction {
+  id                 String           @id @default(cuid())
+  supporterAccountId String
+  type               String
+  points             Int
+  balanceAfter       Int
+  entityId           String?
+  supportId          String?
+  purchaseId         String?
+  note               String?
+  createdAt          DateTime         @default(now())
+  supporterAccount   SupporterAccount @relation(fields: [supporterAccountId], references: [id])
+  purchase           PointPurchase?   @relation(fields: [purchaseId], references: [id])
+}
