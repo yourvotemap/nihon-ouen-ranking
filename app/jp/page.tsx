@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: '日本を支える人・企業・団体を、応援ポイントで可視化するランキングサイト。批判ではなく応援を集めるポジティブなランキングサービスです。',
 };
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export default async function JpTopPage() {
   const topEntities = await getRankings({ countryCode: 'JP', limit: 10 });

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: '人物・企業・団体・プロジェクトなどカテゴリ別にランキングを見る。',
 };
 
-export const revalidate = 300;
+export const dynamic = 'force-dynamic';
 
 export default async function CategoriesPage() {
   const counts = await prisma.entity.groupBy({

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: '日本に貢献している人物・企業・団体・プロジェクトの総合ランキング。',
 };
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export default async function RankingsPage({
   searchParams,
